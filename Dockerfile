@@ -6,6 +6,8 @@ COPY package.json bun.lock* package-lock.json* ./
 RUN npm install
 
 COPY . .
+# Tell Nitro to build a standalone Node.js server
+ENV NITRO_PRESET=node-server 
 RUN npm run build
 
 # --- runtime stage ---
