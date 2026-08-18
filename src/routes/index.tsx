@@ -101,19 +101,18 @@ function Index() {
           </div>
         </section>
 
-
-        <section id="features" className="mx-auto max-w-6xl px-6 py-24">
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+        <section id="features" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">
             Everything you need to launch
           </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-5 sm:mt-12 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
             {features.map((f) => (
               <div
                 key={f.title}
-                className="rounded-2xl border border-border bg-card p-6"
+                className="rounded-2xl border border-border bg-card p-5 sm:p-6"
                 style={{ boxShadow: "var(--shadow-card)" }}
               >
-                <f.icon className="h-6 w-6 text-primary" />
+                <f.icon className="h-6 w-6 shrink-0 text-primary" />
                 <h3 className="mt-4 text-lg font-medium">{f.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{f.body}</p>
               </div>
@@ -122,23 +121,24 @@ function Index() {
         </section>
 
         <section id="pricing" className="border-y border-border bg-secondary/30">
-          <div className="mx-auto max-w-6xl px-6 py-24 text-center">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-24">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">
               Simple pricing, no surprises
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+            <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
               Start free while you build. Upgrade to Pro at $29/month when you go live.
             </p>
-            <Button size="lg" className="mt-8 gap-2">
+            <Button size="lg" className="mt-8 w-full gap-2 sm:w-auto">
               Create your site <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </section>
       </main>
 
-      <footer className="mx-auto max-w-6xl px-6 py-10 text-sm text-muted-foreground">
+      <footer className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted-foreground sm:px-6 sm:py-10">
         © {new Date().getFullYear()} Northbeam. All rights reserved.
       </footer>
+
     </div>
   );
 }
