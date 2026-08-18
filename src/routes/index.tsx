@@ -69,23 +69,23 @@ function Index() {
           className="relative overflow-hidden"
           style={{ backgroundImage: "var(--gradient-hero)" }}
         >
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 md:grid-cols-2 md:py-32">
+          <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-20 md:grid-cols-2 md:gap-12 md:py-32">
             <div>
-              <span className="inline-flex items-center rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground">
+              <span className="inline-flex max-w-full items-center rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground">
                 Now with one-command Docker deploys
               </span>
-              <h1 className="mt-6 text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
+              <h1 className="mt-6 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-6xl">
                 Marketing sites that ship on day one
               </h1>
-              <p className="mt-5 max-w-lg text-lg text-muted-foreground">
+              <p className="mt-4 max-w-lg text-base text-muted-foreground sm:mt-5 sm:text-lg">
                 Northbeam gives your team a fast, container-ready foundation — so launches take
                 hours, not sprints.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button size="lg" className="gap-2">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Button size="lg" className="w-full gap-2 sm:w-auto">
                   Start free <ArrowRight className="h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto">
                   Book a demo
                 </Button>
               </div>
@@ -95,11 +95,12 @@ function Index() {
               alt="Abstract illustration of Northbeam's deployment platform"
               width={1600}
               height={1000}
-              className="rounded-2xl border border-border"
+              className="order-first h-auto w-full rounded-2xl border border-border md:order-none"
               style={{ boxShadow: "var(--shadow-glow)" }}
             />
           </div>
         </section>
+
 
         <section id="features" className="mx-auto max-w-6xl px-6 py-24">
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
