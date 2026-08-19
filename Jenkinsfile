@@ -5,7 +5,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'shubhamkumbhar/my-node-app'
+        DOCKER_IMAGE = 'shubham5027/my-node-app'
         CONTAINER_NAME = 'my-node-app'
         APP_PORT = '3000'
     }
