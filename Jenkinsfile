@@ -1,6 +1,13 @@
 pipeline {
+
     agent {
         label 'app-server'
+    }
+
+    environment {
+        DOCKER_IMAGE = 'shubhamkumbhar/my-node-app'
+        CONTAINER_NAME = 'my-node-app'
+        APP_PORT = '3000'
     }
 
     stages {
@@ -11,11 +18,44 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Docker Build') {
             steps {
                 sh '''
-                    docker build -t :${BUILD_NUMBER} .
-                    docker tag market:${BUILD_NUMBER} market:latest
+                    echo "Building Docker image..."
+
+                    docker build \
+                        -t ${DOCKER_IMAGE}:${BUILD_NUMBER} \
+                        -t ${DOCKER_IMAGE}:latest \
+                        .
+                '''
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | docker login \
+                            -u "$DOCKER_USERNAME" \
+                            --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh '''
+                    echo "Pushing Docker image..."
+
+                    docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                    docker push ${DOCKER_IMAGE}:latest
                 '''
             }
         }
@@ -23,8 +63,20 @@ pipeline {
         stage('Stop Old Container') {
             steps {
                 sh '''
-                    docker stop market || true
-                    docker rm market || true
+                    echo "Stopping old container..."
+
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm ${CONTAINER_NAME} || true
+                '''
+            }
+        }
+
+        stage('Pull Latest Image') {
+            steps {
+                sh '''
+                    echo "Pulling latest image..."
+
+                    docker pull ${DOCKER_IMAGE}:latest
                 '''
             }
         }
@@ -32,31 +84,44 @@ pipeline {
         stage('Run New Container') {
             steps {
                 sh '''
+                    echo "Starting new container..."
+
                     docker run -d \
-                      --name market \
-                      -p 3000:3000 \
-                      market:latest
+                        --name ${CONTAINER_NAME} \
+                        -p ${APP_PORT}:${APP_PORT} \
+                        ${DOCKER_IMAGE}:latest
                 '''
             }
         }
 
-        stage('Verify Application') {
+        stage('Verify Deployment') {
             steps {
                 sh '''
+                    echo "Checking container..."
+
                     sleep 10
+
                     docker ps
+
+                    docker inspect ${CONTAINER_NAME} \
+                        --format='{{.State.Status}}'
                 '''
             }
         }
     }
 
     post {
+
         success {
-            echo 'Deployment successful!'
+            echo '======================================'
+            echo 'Deployment Successful!'
+            echo '======================================'
         }
 
         failure {
-            echo 'Deployment failed!'
+            echo '======================================'
+            echo 'Deployment Failed!'
+            echo '======================================'
         }
     }
 }
