@@ -47,7 +47,7 @@ function Index() {
         <nav className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-4 sm:flex sm:justify-between sm:px-6">
           <span className="flex min-w-0 items-center gap-2 text-base font-semibold tracking-tight sm:text-lg">
             <Sparkles className="h-5 w-5 shrink-0 text-primary" />
-            <span className="truncate">Northbeam</span>
+            <span className="truncate">Mindsprint</span>
           </span>
           <div className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
             <a href="#features" className="transition-colors hover:text-foreground">
