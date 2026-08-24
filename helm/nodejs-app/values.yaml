@@ -1,0 +1,21 @@
+replicaCount: 2
+
+image:
+  repository: 387795052281.dkr.ecr.ap-south-1.amazonaws.com/nodejs-eks-app
+  tag: "v1"
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 3001
+
+containerPort: 3000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

@@ -1,13 +1,12 @@
 pipeline {
 
-    agent {
-        label 'app-server'
-    }
+    agent any
 
     environment {
-        DOCKER_IMAGE = 'shubham5027/my-node-app'
-        CONTAINER_NAME = 'my-node-app'
-        APP_PORT = '3000'
+        AWS_REGION = 'ap-south-1'
+        ECR_REPOSITORY = 'nodejs-eks-app'
+        EKS_CLUSTER = 'nodejs-eks-cluster'
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -18,110 +17,70 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Test') {
             steps {
-                sh '''
-                    echo "Building Docker image..."
-
-                    docker build \
-                        -t ${DOCKER_IMAGE}:${BUILD_NUMBER} \
-                        -t ${DOCKER_IMAGE}:latest \
-                        .
-                '''
+                sh 'npm ci'
+                sh 'npm test'
             }
         }
 
-        stage('Docker Login') {
+        stage('Docker Build') {
             steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-credentials',
-                        usernameVariable: 'DOCKER_USERNAME',
-                        passwordVariable: 'DOCKER_PASSWORD'
-                    )
-                ]) {
-                    sh '''
-                        echo "$DOCKER_PASSWORD" | docker login \
-                            -u "$DOCKER_USERNAME" \
-                            --password-stdin
-                    '''
-                }
+                sh """
+                    docker build \
+                      -t ${ECR_REPOSITORY}:${IMAGE_TAG} .
+                """
+            }
+        }
+
+        stage('ECR Login') {
+            steps {
+                sh """
+                    aws ecr get-login-password \
+                      --region ${AWS_REGION} \
+                    | docker login \
+                      --username AWS \
+                      --password-stdin \
+                      387795052281.dkr.ecr.${AWS_REGION}.amazonaws.com
+                """
             }
         }
 
         stage('Push Image') {
             steps {
-                sh '''
-                    echo "Pushing Docker image..."
+                sh """
+                    docker tag \
+                      ${ECR_REPOSITORY}:${IMAGE_TAG} \
+                      387795052281.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
 
-                    docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    docker push ${DOCKER_IMAGE}:latest
-                '''
+                    docker push \
+                      387795052281.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
+                """
             }
         }
 
-        stage('Stop Old Container') {
+        stage('Deploy to EKS') {
             steps {
-                sh '''
-                    echo "Stopping old container..."
+                sh """
+                    aws eks update-kubeconfig \
+                      --region ${AWS_REGION} \
+                      --name ${EKS_CLUSTER}
 
-                    docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
-                '''
-            }
-        }
-
-        stage('Pull Latest Image') {
-            steps {
-                sh '''
-                    echo "Pulling latest image..."
-
-                    docker pull ${DOCKER_IMAGE}:latest
-                '''
-            }
-        }
-
-        stage('Run New Container') {
-            steps {
-                sh '''
-                    echo "Starting new container..."
-
-                    docker run -d \
-                        --name ${CONTAINER_NAME} \
-                        -p ${APP_PORT}:${APP_PORT} \
-                        ${DOCKER_IMAGE}:latest
-                '''
+                    helm upgrade --install nodejs-app \
+                      ./helm/nodejs-app \
+                      --set image.tag=${IMAGE_TAG}
+                """
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                sh '''
-                    echo "Checking container..."
-
-                    sleep 10
-
-                    docker ps
-
-                    docker inspect ${CONTAINER_NAME} \
-                        --format='{{.State.Status}}'
-                '''
+                sh """
+                    kubectl rollout status \
+                      deployment/nodejs-app \
+                      --timeout=180s
+                """
             }
-        }
-    }
-
-    post {
-
-        success {
-            echo '======================================'
-            echo 'Deployment Successful!'
-            echo '======================================'
-        }
-
-        failure {
-            echo '======================================'
-            echo 'Deployment Failed!'
-            echo '======================================'
         }
     }
 }
